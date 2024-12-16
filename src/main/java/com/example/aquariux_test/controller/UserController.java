@@ -18,9 +18,4 @@ public class UserController {
     public boolean createUser(@RequestBody UserRequest userRequest) {
         return userService.createUser(userRequest);
     }
-
-    // @GetMapping
-    // public List<User> getAllUsers() {
-    //     return userRepository.findAll();
-    // }
 }

@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.example.aquariux_test.dto.BinanceResponseDto;
-import com.example.aquariux_test.service.ExternalApiService;
+import com.example.aquariux_test.entity.SymbolPrice;
 import com.example.aquariux_test.service.SymbolPriceService;
 
 @RestController
@@ -19,7 +17,7 @@ public class SymbolPriceController {
     private SymbolPriceService symbolPriceService;
 
     @GetMapping
-    public void getBinanceSymbolsPrice() {
-           symbolPriceService.updateSymbolPrice();
+    public List<SymbolPrice> getBinanceSymbolsPrice() {
+        return symbolPriceService.getAggregatedSymbolPrice();
     }
 }

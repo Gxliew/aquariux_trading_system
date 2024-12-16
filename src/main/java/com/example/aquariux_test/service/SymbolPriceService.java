@@ -20,10 +20,8 @@ public class SymbolPriceService {
     @Autowired
     private SymbolPriceRepository symbolPriceRepository;
 
-    public List<BinanceResponseDto> getLatestSymbolPrices() {
-        List<BinanceResponseDto> symbols = externalApiService.getBinanceSymbolsPrice();
-
-        return getRequiredSymbols(symbols);
+    public List<SymbolPrice> getAggregatedSymbolPrice() {
+        return symbolPriceRepository.findAll();
     }
 
     public void updateSymbolPrice() {
@@ -44,6 +42,12 @@ public class SymbolPriceService {
             }
 
         }
+    }
+
+    private List<BinanceResponseDto> getLatestSymbolPrices() {
+        List<BinanceResponseDto> symbols = externalApiService.getBinanceSymbolsPrice();
+
+        return getRequiredSymbols(symbols);
     }
 
     private List<BinanceResponseDto> getRequiredSymbols(List<BinanceResponseDto> rawResponseSymbols) {
