@@ -1,6 +1,9 @@
 package com.example.aquariux_test.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,4 +37,8 @@ public class Transaction {
 
     @Column(name = "credit_amount")
     private BigDecimal creditAmount;
+
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

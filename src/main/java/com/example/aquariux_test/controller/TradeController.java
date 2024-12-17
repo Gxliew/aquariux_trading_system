@@ -24,12 +24,12 @@ public class TradeController {
     private TradeService tradeService;
 
     @PostMapping("/open-trade")
-    public ResponseEntity<Trade> openTrade(@RequestBody OpenTradeRequest request) {
+    public Trade openTrade(@RequestBody OpenTradeRequest request) {
         return tradeService.openTrade(request);
     }
 
     @PostMapping("/close-trade")
-    public ResponseEntity<Trade> closeTrade(@RequestBody CloseTradeRequest request) {
+    public Trade closeTrade(@RequestBody CloseTradeRequest request) {
         return tradeService.closeTrade(request);
     }
 }
