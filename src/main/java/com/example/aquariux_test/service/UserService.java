@@ -46,16 +46,6 @@ public class UserService {
     }
 
     @SneakyThrows
-    public List<Transaction> getUserTransactions(Long userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new CustomBadRequestException("User not found!");
-        }
-
-        return transactionRepository.findByUserIdOrderByCreatedAtDesc(userId);
-    }
-
-    @SneakyThrows
     public WalletBalanceResponse getUserWalletBalance(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
@@ -75,7 +65,7 @@ public class UserService {
         BigDecimal walletBalance = totalDebitAmount.subtract(totalCreditAmount);
 
         return new WalletBalanceResponse(userId,
-                walletBalance.compareTo(BigDecimal.ZERO) >= 0 ? walletBalance : BigDecimal.ZERO);
+                walletBalance.compareTo(BigDecimal.ZERO) >= 0 ? walletBalance : BigDecimal.ZERO, transactions);
     }
 
     @SneakyThrows

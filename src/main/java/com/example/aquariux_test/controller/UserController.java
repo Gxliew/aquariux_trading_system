@@ -1,7 +1,6 @@
 package com.example.aquariux_test.controller;
 
 import com.example.aquariux_test.entity.Trade;
-import com.example.aquariux_test.entity.Transaction;
 import com.example.aquariux_test.request.UserRequest;
 import com.example.aquariux_test.response.WalletBalanceResponse;
 import com.example.aquariux_test.service.UserService;
@@ -27,11 +26,6 @@ public class UserController {
     @GetMapping("/wallet-balance/{userId}")
     public WalletBalanceResponse getUserWalletBalance(@PathVariable Long userId) {
         return userService.getUserWalletBalance(userId);
-    }
-
-    @GetMapping("/transactions/{userId}")
-    public List<Transaction> getUserTransactions(@PathVariable Long userId) {
-        return userService.getUserTransactions(userId);
     }
 
     @GetMapping("/trade-history/{userId}")

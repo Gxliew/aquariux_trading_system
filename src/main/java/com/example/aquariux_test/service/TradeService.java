@@ -135,7 +135,7 @@ public class TradeService {
             return trade.getLotSize().multiply(profitPerLot);
         } catch (Exception e) {
             System.out.println("Exception calculating profit:" + e.getMessage());
-            return BigDecimal.ZERO;
+            throw new CustomBadRequestException("Exception calculating profit: "+ e.getMessage());
         }
     }
 }

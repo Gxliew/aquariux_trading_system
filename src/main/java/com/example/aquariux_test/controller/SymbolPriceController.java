@@ -17,7 +17,7 @@ public class SymbolPriceController {
     private SymbolPriceService symbolPriceService;
 
     @GetMapping
-    public List<SymbolPrice> getBinanceSymbolsPrice() {
+    public List<SymbolPrice> getAggregatedSymbolPrice() {
         return symbolPriceService.getAggregatedSymbolPrice();
     }
 }
