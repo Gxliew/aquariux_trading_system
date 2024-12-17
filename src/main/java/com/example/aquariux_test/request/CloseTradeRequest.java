@@ -1,8 +1,9 @@
 package com.example.aquariux_test.request;
 
+import lombok.NonNull;
+
 public record CloseTradeRequest(
-    Long userId,
-    Long tradeId
-) {
+        @NonNull Long userId,
+        @NonNull Long tradeId) {
 
 }

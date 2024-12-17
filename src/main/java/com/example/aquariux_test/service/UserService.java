@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.aquariux_test.entity.Trade;
 import com.example.aquariux_test.entity.Transaction;
 import com.example.aquariux_test.entity.User;
+import com.example.aquariux_test.exception.CustomBadRequestException;
 import com.example.aquariux_test.repository.TradeRepository;
 import com.example.aquariux_test.repository.TransactionRepository;
 import com.example.aquariux_test.repository.UserRepository;
@@ -49,7 +49,7 @@ public class UserService {
     public List<Transaction> getUserTransactions(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
-            throw new BadRequestException("User not found!");
+            throw new CustomBadRequestException("User not found!");
         }
 
         return transactionRepository.findByUserIdOrderByCreatedAtDesc(userId);
@@ -59,7 +59,7 @@ public class UserService {
     public WalletBalanceResponse getUserWalletBalance(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
-            throw new BadRequestException("User not found!");
+            throw new CustomBadRequestException("User not found!");
         }
 
         List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtDesc(userId);
@@ -82,7 +82,7 @@ public class UserService {
     public List<Trade> getUserTradeHistory(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
-            throw new BadRequestException("User not found!");
+            throw new CustomBadRequestException("User not found!");
         }
 
         return tradeRepository.findByUserIdOrderByOpenAtDesc(userId);

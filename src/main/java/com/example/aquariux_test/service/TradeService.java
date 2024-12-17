@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +13,7 @@ import com.example.aquariux_test.entity.Transaction;
 import com.example.aquariux_test.entity.User;
 import com.example.aquariux_test.enums.TradeStatus;
 import com.example.aquariux_test.enums.TradeType;
+import com.example.aquariux_test.exception.CustomBadRequestException;
 import com.example.aquariux_test.repository.SymbolPriceRepository;
 import com.example.aquariux_test.repository.TradeRepository;
 import com.example.aquariux_test.repository.TransactionRepository;
@@ -45,13 +45,13 @@ public class TradeService {
     public Trade openTrade(OpenTradeRequest request) {
         Optional<User> userOpt = userRepository.findById(request.userId());
         if (userOpt.isEmpty()) {
-            throw new BadRequestException("User not found!");
+            throw new CustomBadRequestException("User not found!");
         }
 
         Optional<SymbolPrice> symbolPriceOpt = symbolPriceRepository.findBySymbol(request.symbol());
 
         if (symbolPriceOpt.isEmpty()) {
-            throw new BadRequestException("Symbol price not found!");
+            throw new CustomBadRequestException("Symbol price not found!");
         }
 
         WalletBalanceResponse walletBalanceResponse = userService.getUserWalletBalance(request.userId());
@@ -60,7 +60,7 @@ public class TradeService {
 
         BigDecimal requiredWalletBalance = request.lotSize().multiply(openPrice);
         if (requiredWalletBalance.compareTo(walletBalanceResponse.walletBalance()) >= 0) {
-            throw new BadRequestException("Not sufficient wallet balance!");
+            throw new CustomBadRequestException("Not sufficient wallet balance!");
         }
         Trade trade = Trade.builder()
                 .userId(request.userId())
@@ -89,17 +89,17 @@ public class TradeService {
         Optional<User> userOpt = userRepository.findById(request.userId());
         Optional<Trade> tradeOpt = tradeRepository.findByIdAndUserId(request.tradeId(), request.userId());
         if (userOpt.isEmpty()) {
-            throw new BadRequestException("User not found!");
+            throw new CustomBadRequestException("User not found!");
         }
 
         if (tradeOpt.isEmpty() || !TradeStatus.OPEN.equals(tradeOpt.get().getStatus())) {
-            throw new BadRequestException("Invalid trade to close!");
+            throw new CustomBadRequestException("Invalid trade to close!");
         }
 
         Optional<SymbolPrice> symbolPriceOpt = symbolPriceRepository.findById(tradeOpt.get().getSymbolId());
 
         if (symbolPriceOpt.isEmpty()) {
-            throw new BadRequestException("Symbol price not found!");
+            throw new CustomBadRequestException("Symbol price not found!");
         }
 
         Trade trade = tradeOpt.get();

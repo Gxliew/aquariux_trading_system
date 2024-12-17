@@ -1,7 +1,9 @@
 package com.example.aquariux_test.request;
 
+import lombok.NonNull;
+
 public record UserRequest(
-        String name,
-        String email) {
+       @NonNull String name,
+       @NonNull String email) {
 
 }

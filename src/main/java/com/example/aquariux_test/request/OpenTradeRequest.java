@@ -4,11 +4,12 @@ import java.math.BigDecimal;
 
 import com.example.aquariux_test.enums.TradeType;
 
+import lombok.NonNull;
+
 public record OpenTradeRequest(
-    Long userId,
-    String symbol,
-    TradeType type,
-    BigDecimal lotSize
-) {
+        @NonNull Long userId,
+        @NonNull String symbol,
+        @NonNull TradeType type,
+        @NonNull BigDecimal lotSize) {
 
 }
