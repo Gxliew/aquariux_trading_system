@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.aquariux_test.entity.SymbolPrice;
@@ -21,6 +20,7 @@ import com.example.aquariux_test.repository.TransactionRepository;
 import com.example.aquariux_test.repository.UserRepository;
 import com.example.aquariux_test.request.CloseTradeRequest;
 import com.example.aquariux_test.request.OpenTradeRequest;
+import com.example.aquariux_test.response.WalletBalanceResponse;
 
 import lombok.SneakyThrows;
 
@@ -38,21 +38,30 @@ public class TradeService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private UserService userService;
+
     @SneakyThrows
     public Trade openTrade(OpenTradeRequest request) {
         Optional<User> userOpt = userRepository.findById(request.userId());
-        if (!userOpt.isPresent()) {
+        if (userOpt.isEmpty()) {
             throw new BadRequestException("User not found!");
         }
 
         Optional<SymbolPrice> symbolPriceOpt = symbolPriceRepository.findBySymbol(request.symbol());
 
-        if (!symbolPriceOpt.isPresent()) {
+        if (symbolPriceOpt.isEmpty()) {
             throw new BadRequestException("Symbol price not found!");
         }
 
+        WalletBalanceResponse walletBalanceResponse = userService.getUserWalletBalance(request.userId());
         BigDecimal openPrice = TradeType.BUY.equals(request.type()) ? symbolPriceOpt.get().getAskPrice()
                 : symbolPriceOpt.get().getBidPrice();
+
+        BigDecimal requiredWalletBalance = request.lotSize().multiply(openPrice);
+        if (requiredWalletBalance.compareTo(walletBalanceResponse.walletBalance()) >= 0) {
+            throw new BadRequestException("Not sufficient wallet balance!");
+        }
         Trade trade = Trade.builder()
                 .userId(request.userId())
                 .type(request.type())
@@ -68,7 +77,7 @@ public class TradeService {
         Transaction transaction = Transaction.builder()
                 .userId(request.userId())
                 .debitAmount(BigDecimal.ZERO)
-                .creditAmount(openPrice)
+                .creditAmount(requiredWalletBalance)
                 .build();
 
         transactionRepository.save(transaction);
@@ -79,17 +88,17 @@ public class TradeService {
     public Trade closeTrade(CloseTradeRequest request) {
         Optional<User> userOpt = userRepository.findById(request.userId());
         Optional<Trade> tradeOpt = tradeRepository.findByIdAndUserId(request.tradeId(), request.userId());
-        if (!userOpt.isPresent()) {
+        if (userOpt.isEmpty()) {
             throw new BadRequestException("User not found!");
         }
 
-        if (!tradeOpt.isPresent() || !TradeStatus.OPEN.equals(tradeOpt.get().getStatus())) {
+        if (tradeOpt.isEmpty() || !TradeStatus.OPEN.equals(tradeOpt.get().getStatus())) {
             throw new BadRequestException("Invalid trade to close!");
         }
 
         Optional<SymbolPrice> symbolPriceOpt = symbolPriceRepository.findById(tradeOpt.get().getSymbolId());
 
-        if (!symbolPriceOpt.isPresent()) {
+        if (symbolPriceOpt.isEmpty()) {
             throw new BadRequestException("Symbol price not found!");
         }
 
@@ -98,18 +107,18 @@ public class TradeService {
         BigDecimal closePrice = TradeType.BUY.equals(trade.getType()) ? symbolPriceOpt.get().getAskPrice()
                 : symbolPriceOpt.get().getBidPrice();
 
-        BigDecimal profit = this.calculateProfit(trade);
+        BigDecimal profit = this.calculateProfit(trade, closePrice);
         trade.setClosePrice(closePrice);
         trade.setCloseAt(LocalDateTime.now());
         trade.setProfit(profit);
         trade.setStatus(TradeStatus.CLOSED);
 
         tradeRepository.save(trade);
-
+        
         Transaction transaction = Transaction.builder()
                 .userId(request.userId())
-                .debitAmount(profit.compareTo(BigDecimal.ZERO) >= 0 ? profit : BigDecimal.ZERO)
-                .creditAmount(profit.compareTo(BigDecimal.ZERO) <= 0 ? profit.abs() : BigDecimal.ZERO)
+                .debitAmount((trade.getLotSize().multiply(trade.getOpenPrice())).add(profit))
+                .creditAmount(BigDecimal.ZERO)
                 .build();
 
         transactionRepository.save(transaction);
@@ -117,8 +126,16 @@ public class TradeService {
         return trade;
     }
 
-    private BigDecimal calculateProfit(Trade trade) {
-        // TO DO
-        return BigDecimal.ZERO;
+    private BigDecimal calculateProfit(Trade trade, BigDecimal closePrice) {
+        try {
+            BigDecimal profitPerLot = TradeType.BUY.equals(trade.getType())
+                    ? (closePrice.subtract(trade.getOpenPrice()))
+                    : (trade.getOpenPrice().subtract(closePrice));
+
+            return trade.getLotSize().multiply(profitPerLot);
+        } catch (Exception e) {
+            System.out.println("Exception calculating profit:" + e.getMessage());
+            return BigDecimal.ZERO;
+        }
     }
 }

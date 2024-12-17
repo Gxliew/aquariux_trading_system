@@ -48,7 +48,7 @@ public class UserService {
     @SneakyThrows
     public List<Transaction> getUserTransactions(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
-        if (!userOpt.isPresent()) {
+        if (userOpt.isEmpty()) {
             throw new BadRequestException("User not found!");
         }
 
@@ -58,7 +58,7 @@ public class UserService {
     @SneakyThrows
     public WalletBalanceResponse getUserWalletBalance(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
-        if (!userOpt.isPresent()) {
+        if (userOpt.isEmpty()) {
             throw new BadRequestException("User not found!");
         }
 
@@ -81,7 +81,7 @@ public class UserService {
     @SneakyThrows
     public List<Trade> getUserTradeHistory(Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
-        if (!userOpt.isPresent()) {
+        if (userOpt.isEmpty()) {
             throw new BadRequestException("User not found!");
         }
 
